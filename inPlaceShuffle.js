@@ -1,75 +1,86 @@
 // inPlaceShuffle.js
 
-function getRandom(floor, ceiling) {
+const getRandom = (floor, ceiling) => {
   return floor + Math.floor(Math.random() * (ceiling - floor + 1));
-}
+};
 
-// Using a set to keep track of used indices
-// O(n) space
-// O(n)+ time. not sure exact time
-function shuffleInPlace1(array) {
-  // copying the array is O(n) space and O(n) time
-  const arrayCopy = [...array];
-  // the set will be O(n) space and O(n) time
-  const usedIndices = new Set();
-
-  // iterating through the array is O(n) time
-  for (let index = 0; index < arrayCopy.length; index += 1) {
-    const currentValue = arrayCopy[index];
-
-    let randomIndex = getRandom(0, array.length - 1);
-
-    // what's the runtime complexity of this? O(n)+
-    while (usedIndices.has(randomIndex)) {
-      randomIndex = getRandom(0, array.length - 1);
-    }
-
-    array[randomIndex] = currentValue;
-    usedIndices.add(randomIndex);
-  }
-}
-
-// Fisher-Yates or Knuth shuffle
-// O(1) space
-// O(n) time
 function shuffleInPlace(array) {
   for (let index = 0; index < array.length; index += 1) {
+    // Get the value at the current index and the value at a random index
+    // Use the Fisher-Yates method rather than the naive method
     const currentValue = array[index];
-
     const randomIndex = getRandom(index, array.length - 1);
+    const randomValue = array[randomIndex];
 
-    if (index !== randomIndex) {
-      const randomIndexValue = array[randomIndex];
-      array[index] = randomIndexValue;
-      array[randomIndex] = currentValue;
-    }
+    // Swap the values
+    array[index] = randomValue;
+    array[randomIndex] = currentValue;
   }
 }
 
-let input;
+// TESTS
+let desc, array, clone;
 
-input = [1];
-printShufflePrint(input);
+desc = "short array of numbers";
+array = [1, 2, 3];
+clone = [...array];
+shuffleInPlace(array);
+assertShuffled(desc, clone, array);
 
-input = [1, 2];
-printShufflePrint(input);
+desc = "medium array of numbers";
+array = [10, 2, 3, 5, 2, 6];
+clone = [...array];
+shuffleInPlace(array);
+assertShuffled(desc, clone, array);
 
-input = [1, 2, 3];
-printShufflePrint(input);
+desc = "long array of numbers";
+array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 100, 200, 500];
+clone = [...array];
+shuffleInPlace(array);
+assertShuffled(desc, clone, array);
 
-input = [1, 2, 3, 4, 5];
-printShufflePrint(input);
+desc = "short array of strings";
+array = ["a", "b", "c"];
+clone = [...array];
+shuffleInPlace(array);
+assertShuffled(desc, clone, array);
 
-input = ["a", "b", "c"];
-printShufflePrint(input);
+desc = "medium array of strings";
+array = ["a", "a", "b", "c", "d", "E", "F", "g"];
+clone = [...array];
+shuffleInPlace(array);
+assertShuffled(desc, clone, array);
 
-input = [true, true, false, false];
-printShufflePrint(input);
+// sort each array. walk through arrays and compare the elements. 
+// if any pair is not the same, the test fails. 
+// if all pairs are the same, the test passes
+// assume arrays contain only primitives, i.e. elements are not objects
+function assertShuffled(desc, original, shuffled) {
+  console.log("-----------------------------------------------------------");
+  console.log(desc);
 
-function printShufflePrint(input) {
-  console.log("----------------------------------------------------------");
-  console.log("before:", input);
-  shuffleInPlace(input);
-  console.log("after:", input);
+  const originalSorted = [...original].sort();
+  const shuffledSorted = [...shuffled].sort();
+  
+  let testPasses = true;
+
+  for (
+    let index = 0; 
+    index < Math.max(originalSorted.length, shuffledSorted.length); 
+    index += 1
+  ) {
+    if (!testPasses) continue;
+
+    if (originalSorted[index] !== shuffledSorted[index]) {
+      testPasses = false;
+    }
+  }
+
+  if (testPasses) {
+    console.log(`PASS ... ${original} == ${shuffled}`);
+  } else {
+    console.log(`FAIL ... ${original} !== ${shuffled}`);
+  }
 }
+
 
